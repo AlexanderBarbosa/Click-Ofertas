@@ -6,6 +6,9 @@ import { GroupsManagerView } from './components/GroupsManagerView';
 import { QueueSchedulerView } from './components/QueueSchedulerView';
 import { AffiliateSettingsView } from './components/AffiliateSettingsView';
 import { DispatchLogsView } from './components/DispatchLogsView';
+import { BrandingSettingsView } from './components/BrandingSettingsView';
+import { PublicLandingView } from './components/PublicLandingView';
+import { AdminLoginModal } from './components/AdminLoginModal';
 import { WhatsAppPreviewModal } from './components/WhatsAppPreviewModal';
 import { ManualOfferModal } from './components/ManualOfferModal';
 import { BatchDispatchModal } from './components/BatchDispatchModal';
@@ -13,7 +16,12 @@ import { store } from './lib/storage';
 import { DealOffer, ScheduledDispatch, DispatchLog, WhatsAppGroup, AffiliateConfig } from './lib/types';
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<string>('dashboard');
+  const [currentTab, setCurrentTab] = useState<string>('public-landing');
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
+    return sessionStorage.getItem('autozap_admin_auth') === 'true';
+  });
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(false);
+
   const [darkMode, setDarkMode] = useState<boolean>(() => {
     return localStorage.getItem('autozap_theme') === 'dark' || 
       window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -65,6 +73,41 @@ export default function App() {
     setDarkMode(!darkMode);
   };
 
+  const handleOpenAdminLogin = () => {
+    if (isAdminAuthenticated) {
+      setCurrentTab('dashboard');
+    } else {
+      setIsLoginModalOpen(true);
+    }
+  };
+
+  const handleAdminLoginSuccess = () => {
+    setIsAdminAuthenticated(true);
+    sessionStorage.setItem('autozap_admin_auth', 'true');
+    setIsLoginModalOpen(false);
+    setCurrentTab('dashboard');
+  };
+
+  const handleAdminLogout = () => {
+    setIsAdminAuthenticated(false);
+    sessionStorage.removeItem('autozap_admin_auth');
+    setCurrentTab('public-landing');
+  };
+
+  const handleSelectTab = (tab: string) => {
+    if (tab === 'public-landing') {
+      setCurrentTab('public-landing');
+      return;
+    }
+
+    if (!isAdminAuthenticated) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    setCurrentTab(tab);
+  };
+
   // Handlers for offers
   const handleOpenPreview = (offer: DealOffer) => {
     setPreviewOffer(offer);
@@ -72,6 +115,10 @@ export default function App() {
   };
 
   const handleOpenNewOffer = () => {
+    if (!isAdminAuthenticated) {
+      setIsLoginModalOpen(true);
+      return;
+    }
     setIsManualModalOpen(true);
   };
 
@@ -144,12 +191,11 @@ export default function App() {
     const activeGroupIds = groups.filter(g => g.active).map(g => g.id);
     if (offers.length === 0 || activeGroupIds.length === 0) return;
 
-    // Pick top 3 offers
     const topOffers = offers.slice(0, 3);
     const times = [
-      new Date(Date.now() + 1000 * 60 * 45).toISOString(),  // in 45 mins
-      new Date(Date.now() + 1000 * 60 * 180).toISOString(), // in 3 hours
-      new Date(Date.now() + 1000 * 60 * 360).toISOString(), // in 6 hours
+      new Date(Date.now() + 1000 * 60 * 45).toISOString(),
+      new Date(Date.now() + 1000 * 60 * 180).toISOString(),
+      new Date(Date.now() + 1000 * 60 * 360).toISOString(),
     ];
 
     topOffers.forEach((offer, idx) => {
@@ -163,7 +209,6 @@ export default function App() {
     });
   };
 
-  // Handlers for groups
   const handleToggleGroup = (id: string) => {
     store.toggleGroup(id);
   };
@@ -180,7 +225,6 @@ export default function App() {
     store.deleteGroup(id);
   };
 
-  // Handlers for config & bot
   const handleToggleAutoPilot = () => {
     store.updateConfig({ autoPilotEnabled: !config.autoPilotEnabled });
   };
@@ -196,24 +240,44 @@ export default function App() {
   };
 
   const handleResendLog = (log: DispatchLog) => {
-    // Find matching offer or reconstruct
     const matchingOffer = offers.find(o => o.title === log.offerTitle) || offers[0];
     if (matchingOffer) {
       handleOpenPreview(matchingOffer);
     }
   };
 
+  // If public landing page is selected
+  if (currentTab === 'public-landing') {
+    return (
+      <>
+        <PublicLandingView
+          offers={offers}
+          config={config}
+          onOpenAdminLogin={handleOpenAdminLogin}
+        />
+        <AdminLoginModal
+          isOpen={isLoginModalOpen}
+          onClose={() => setIsLoginModalOpen(false)}
+          config={config}
+          onLoginSuccess={handleAdminLoginSuccess}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors">
       
-      {/* Top Bar following Top Bar Contract */}
+      {/* Top Bar */}
       <TopNavbar
         currentTab={currentTab}
-        onSelectTab={setCurrentTab}
+        onSelectTab={handleSelectTab}
         onOpenNewOffer={handleOpenNewOffer}
         darkMode={darkMode}
         onToggleDarkMode={toggleDarkMode}
         autoPilotActive={config.autoPilotEnabled}
+        config={config}
+        onLogoutAdmin={handleAdminLogout}
       />
 
       {/* Main Content Area */}
@@ -226,7 +290,7 @@ export default function App() {
             logs={logs}
             config={config}
             onOpenPreview={handleOpenPreview}
-            onNavigateTab={setCurrentTab}
+            onNavigateTab={handleSelectTab}
             onToggleAutoPilot={handleToggleAutoPilot}
           />
         )}
@@ -269,6 +333,13 @@ export default function App() {
             config={config}
             onSaveConfig={handleSaveConfig}
             onResetData={handleResetData}
+          />
+        )}
+
+        {currentTab === 'branding' && (
+          <BrandingSettingsView
+            config={config}
+            onSaveConfig={handleSaveConfig}
           />
         )}
 
@@ -316,6 +387,14 @@ export default function App() {
           onClose={() => setBatchModalOpen(false)}
         />
       )}
+
+      {/* Admin Login Modal */}
+      <AdminLoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        config={config}
+        onLoginSuccess={handleAdminLoginSuccess}
+      />
 
     </div>
   );

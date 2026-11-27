@@ -90,6 +90,13 @@ export interface AffiliateConfig {
   whatsappPairingMethod: 'qrcode' | 'pairing_code';
   whatsappWebhookUrl: string;
   lastConnectedAt?: string;
+  appName?: string;
+  appSubtitle?: string;
+  appLogoUrl?: string;
+  adminUser?: string;
+  adminPass?: string;
+  adminEmail?: string;
+  whatsappGroupInviteLink?: string;
 }
 
 export interface MessageTemplate {

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Send, Plus, Sparkles, Moon, Sun } from 'lucide-react';
+import { Send, Plus, Sparkles, Moon, Sun, Globe, LogOut } from 'lucide-react';
+import { AffiliateConfig } from '../lib/types';
 
 interface TopNavbarProps {
   currentTab: string;
@@ -8,6 +9,8 @@ interface TopNavbarProps {
   darkMode: boolean;
   onToggleDarkMode: () => void;
   autoPilotActive: boolean;
+  config: AffiliateConfig;
+  onLogoutAdmin: () => void;
 }
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({
@@ -17,6 +20,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   darkMode,
   onToggleDarkMode,
   autoPilotActive,
+  config,
+  onLogoutAdmin,
 }) => {
   const navItems = [
     { id: 'dashboard', label: 'Painel Geral' },
@@ -24,8 +29,13 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     { id: 'groups', label: 'Grupos WhatsApp' },
     { id: 'queue', label: 'Fila & Agendamento' },
     { id: 'settings', label: 'Afiliados & Bot' },
+    { id: 'branding', label: 'Marca & Logo' },
     { id: 'logs', label: 'Histórico' },
   ];
+
+  const currentAppName = config.appName || 'Click Ofertas';
+  const currentAppSubtitle = config.appSubtitle || 'Automação WhatsApp & Radar';
+  const currentLogoUrl = config.appLogoUrl || '/public/assets/aistudio/Mascote_Click_Ofertas_0bad9dc5.jpg';
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 transition-colors">
@@ -35,17 +45,21 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         <div className="flex items-center gap-3 shrink-0 cursor-pointer" onClick={() => onSelectTab('dashboard')}>
           <div className="w-10 h-10 rounded-xl overflow-hidden shadow-sm border border-orange-200 dark:border-orange-800/80 bg-orange-50 shrink-0">
             <img
-              src="/public/assets/aistudio/Mascote_Click_Ofertas_0bad9dc5.jpg"
-              alt="Mascote Click Ofertas"
+              src={currentLogoUrl}
+              alt="Logotipo do Aplicativo"
               className="w-full h-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/public/assets/aistudio/Mascote_Click_Ofertas_0bad9dc5.jpg';
+              }}
             />
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white whitespace-nowrap flex items-center gap-1.5">
-              Click Ofertas
+              {currentAppName}
+              <span className="text-[10px] px-1.5 py-0.2 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 rounded font-bold">Admin</span>
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-              Automação WhatsApp & Radar
+              {currentAppSubtitle}
             </span>
           </div>
         </div>
@@ -70,8 +84,17 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           })}
         </nav>
 
-        {/* Zone 3: Actions (Theme toggle + New Offer CTA) */}
+        {/* Zone 3: Actions */}
         <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={() => onSelectTab('public-landing')}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-colors cursor-pointer"
+            title="Ver Landing Page Pública"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Ver Vitrine Pública</span>
+          </button>
+
           <button
             onClick={onToggleDarkMode}
             aria-label="Alternar tema"
@@ -86,6 +109,14 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           >
             <Plus className="w-4 h-4" />
             <span>Adicionar Oferta</span>
+          </button>
+
+          <button
+            onClick={onLogoutAdmin}
+            title="Sair do Modo Admin"
+            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>

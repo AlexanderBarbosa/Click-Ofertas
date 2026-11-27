@@ -307,6 +307,13 @@ export const DEFAULT_AFFILIATE_CONFIG: AffiliateConfig = {
   whatsappPairingMethod: 'qrcode',
   whatsappWebhookUrl: 'https://ais-dev-vyvhtr7zm3xyhqdvy4lzgh-910477903968.us-east1.run.app/api/webhook/whatsapp',
   lastConnectedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+  appName: 'Click Ofertas',
+  appSubtitle: 'Automação WhatsApp & Radar',
+  appLogoUrl: '/public/assets/aistudio/Mascote_Click_Ofertas_0bad9dc5.jpg',
+  adminUser: 'admin',
+  adminPass: 'admin123',
+  adminEmail: 'admin@clickofertas.com',
+  whatsappGroupInviteLink: 'https://chat.whatsapp.com/invite/clickofertasvip',
 };
 
 export const INITIAL_LOGS: DispatchLog[] = [

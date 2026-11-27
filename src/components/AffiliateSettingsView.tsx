@@ -59,7 +59,14 @@ export const AffiliateSettingsView: React.FC<AffiliateSettingsViewProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSaveConfig(formData);
+    const finalData = {
+      ...formData,
+      adminUser: formData.adminUser?.trim() || 'admin',
+      adminPass: formData.adminPass || 'admin123',
+      adminEmail: formData.adminEmail?.trim() || 'admin@clickofertas.com',
+      whatsappGroupInviteLink: formData.whatsappGroupInviteLink?.trim() || 'https://chat.whatsapp.com/invite/clickofertasvip',
+    };
+    onSaveConfig(finalData);
     setSavedSuccess(true);
     setTimeout(() => setSavedSuccess(false), 2500);
   };
@@ -379,6 +386,73 @@ export const AffiliateSettingsView: React.FC<AffiliateSettingsViewProps> = ({
                 <option value={35}>A partir de 35% OFF (Padrão)</option>
                 <option value={50}>Apenas Super Ofertas (≥ 50% OFF)</option>
               </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 2.5: Admin Security Credentials & WhatsApp Group Link */}
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-4">
+          <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+              Credenciais de Acesso Admin & Link do Grupo VIP WhatsApp
+            </h2>
+          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Modifique seu login, senha de acesso ao painel restrito e o link de convite do grupo VIP exibido na landing page pública:
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Usuário Admin
+              </label>
+              <input
+                type="text"
+                value={formData.adminUser ?? ''}
+                onChange={(e) => setFormData({ ...formData, adminUser: e.target.value })}
+                placeholder="admin"
+                className="w-full p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Nova Senha Admin
+              </label>
+              <input
+                type="text"
+                value={formData.adminPass ?? ''}
+                onChange={(e) => setFormData({ ...formData, adminPass: e.target.value })}
+                placeholder="admin123"
+                className="w-full p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                E-mail para Recuperação
+              </label>
+              <input
+                type="email"
+                value={formData.adminEmail ?? ''}
+                onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
+                placeholder="admin@clickofertas.com"
+                className="w-full p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Link do Grupo WhatsApp
+              </label>
+              <input
+                type="url"
+                value={formData.whatsappGroupInviteLink ?? ''}
+                onChange={(e) => setFormData({ ...formData, whatsappGroupInviteLink: e.target.value })}
+                placeholder="https://chat.whatsapp.com/..."
+                className="w-full p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-900 dark:text-white font-mono"
+              />
             </div>
           </div>
         </div>
